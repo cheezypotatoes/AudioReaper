@@ -19,8 +19,11 @@ class App():
         self.downloadThread = threading.Thread(target=self.downloadHandler, daemon=True)  # Handles the download part
         self.queue = queue.Queue()  # Holds all sent messages
         self.downloadQueue = queue.Queue()  # Hold all message protocol with links in it (to download)
+        # Holds all method per protocols
         self.protocolAdditionalFunctions = defaultdict(lambda: self.defaultDoesNothing, {
                                 "CheckDownloadQueue": self.returnDownloadQueue,
+                                "ClearDownloadQueue": self.clearDownloadQueue,
+                                "CheckStatus": self.getStatus
                                 })
     
     # Protocol methods
@@ -39,14 +42,22 @@ class App():
     def defaultDoesNothing(self, *args, **kwargs):
         return None
     """
-    Grabs message to process from the listener queue to handle
+    Clears the download queue
     """
-    def CheckIfDataInQueue(self):
-        result = self.listener.getQueue()
-        if result:  # This checks if result is not None and not empty
-            self.queue.put(result)
+    def clearDownloadQueue(self, *args, **kwargs):
+        with self.downloadQueue.mutex:
+            self.downloadQueue.queue.clear()
+    """
+    Return bot's status, just basic stuff, room for improvements
+    """
+    def getStatus(self, *args, **kwargs):
+        return " Running"
+
 
     # HANDLERS
+    """
+    Handles the messages, if protocol require downloads such as "YoutubeLink" It is transferred to downloadQueue for download thread to handle
+    """
     def handleMessageToProcess(self):
         if not self.queue.empty():
             messageQueued = self.queue.get()  # [Protocol, UserId, Message, ServerId]
@@ -55,9 +66,11 @@ class App():
             if messageQueued[0] == "YoutubeLink":
                 self.downloadQueue.put(messageQueued)
                 return
-        
+
+            # Call the protocol's method return None if doesn't exist
             additionalRespond = self.protocolAdditionalFunctions[messageQueued[0]](sender_text=messageQueued[2])
 
+            # Respond to the user
             self.respond.sendRespond(messageQueued[0], messageQueued[1], messageQueued[3], self.token, additionalRespond if additionalRespond is not None else "",None)
 
     """
@@ -76,28 +89,45 @@ class App():
         while True:
             if not self.downloadQueue.empty():
                 downloadMessageToProcess = self.downloadQueue.get()
-                # Downloads the music and return the path
-                music_path = downloader.ReturnMusic(downloadMessageToProcess[2].split(' ', 1)[1])
-                # Message that tells user that download is being processed
-                self.respond.sendRespond("RespondBeforeDownload",
-                                        downloadMessageToProcess[1],
-                                        downloadMessageToProcess[3],
-                                        self.token,
-                                        f" {music_path.split('/', 1)[1]}",
-                                        None)
-                # Message that sends the downloaded music
-                self.respond.sendRespond(downloadMessageToProcess[0],
-                                        downloadMessageToProcess[1],
-                                        downloadMessageToProcess[3],
-                                        self.token,
-                                        "",
-                                        music_path)
+                print(downloadMessageToProcess)
+                if downloadMessageToProcess[0] == "YoutubeLink":
+                    self.DownloadAndRespond(downloadMessageToProcess)
             time.sleep(0.5)
+
+    # Handler helper methods
+    """
+    Grabs message to process from the listener queue to handle
+    """
+    def CheckIfDataInQueue(self):
+        result = self.listener.getQueue()
+        if result:  # This checks if result is not None and not empty
+            self.queue.put(result)
+    """
+    Downloads the link and respond to the user
+    """
+    def DownloadAndRespond(self, downloadMessageToProcess):
+        # Downloads the music and return the path
+        music_path = downloader.ReturnMusic(downloadMessageToProcess[2].split(' ', 1)[1])
+        # Message that tells user that download is being processed
+        self.respond.sendRespond("RespondBeforeDownload",
+                                downloadMessageToProcess[1],
+                                downloadMessageToProcess[3],
+                                self.token,
+                                f" {music_path.split('/', 1)[1]}",
+                                None)
+        # Message that sends the downloaded music
+        self.respond.sendRespond(downloadMessageToProcess[0],
+                                downloadMessageToProcess[1],
+                                downloadMessageToProcess[3],
+                                self.token,
+                                "",
+                                music_path)
+
 
     def StartProgram(self):
         self.listenerThread.start()  # Listener
         self.respondThread.start()  # Respond
-        #self.downloadThread.start()  # Download
+        self.downloadThread.start()  # Download
         
         while True: # Keeps everything from running if main thread is done everything is done
             time.sleep(1)

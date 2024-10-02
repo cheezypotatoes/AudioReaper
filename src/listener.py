@@ -94,7 +94,6 @@ class listenerClass:
     the bot and if it contains a specific command. It can handle commands for downloading
     YouTube links and other protocols defined in the MessageProtocolMap.
     """
-
     async def handleMessage(self, messageJson, *args, **kwargs):
         if len(messageJson['mentions']) != 0 and messageJson['mentions'][0]['username'] == self.botName:
             messageSent = messageJson['content'].split(' ', 1)[1] # Get the message (removing the @bot)

@@ -12,7 +12,7 @@ class respond:
                 "4. `!downloadQueue`\n     > Shows the download queue.\n"
                 "5. `!clear`\n     > Clears the current queue.\n"
                 "6. `!downloadMany <url>,<url>..`\n     > Convert multiple links. (download)\n"),
-            "CheckStatus": "STATUS: RUNNING",
+            "CheckStatus": "STATUS:",
             "CheckDownloadQueue": "\n Current download queue: \n",
             "YoutubeLink": "Processing link please wait",
             "RespondAfterDownload": "Here is your requested MP3 file!",
