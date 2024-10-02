@@ -25,6 +25,8 @@ class App():
                                 "ClearDownloadQueue": self.clearDownloadQueue,
                                 "CheckStatus": self.getStatus
                                 })
+        # Holds all method per download type
+        self.downloadDictionary = {"YoutubeLink": self.DownloadAndRespond}
     
     # Protocol methods
     """
@@ -83,15 +85,14 @@ class App():
             time.sleep(0.3)  # Adjust?
     
     """
-    Method that handles with messages that uses 'YoutubeLink' protocol
+    Method that handles with messages that uses 'YoutubeLink' or "MultipleLink" protocol
     """
     def downloadHandler(self):
         while True:
             if not self.downloadQueue.empty():
                 downloadMessageToProcess = self.downloadQueue.get()
-                print(downloadMessageToProcess)
-                if downloadMessageToProcess[0] == "YoutubeLink":
-                    self.DownloadAndRespond(downloadMessageToProcess)
+                # Uses hashmap for determine the type of download
+                self.downloadDictionary[downloadMessageToProcess[0]](downloadMessageToProcess)
             time.sleep(0.5)
 
     # Handler helper methods
