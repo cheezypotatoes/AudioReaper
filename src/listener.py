@@ -16,12 +16,13 @@ class listenerClass:
         self.events = {"MESSAGE_CREATE": self.handleMessage,
                        "READY": self.onReady,}
         self.MessageToProcess = queue.Queue()  # Temporarily holds the messages
+        # Gives the type of protocol
         self.MessageProtocolMap = defaultdict(lambda: "Greet", {
             "!help": "Instruction",
             "!downloadQueue": "CheckDownloadQueue",
             "!status": "CheckStatus",
             "!clear": "ClearDownloadQueue",
-            "!downloadMany": "DownloadMany"
+            "!downloadMany": "MultipleLinks"
         })
 
     async def onReady(self, *args, **kwargs):

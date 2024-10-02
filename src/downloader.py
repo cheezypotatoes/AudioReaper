@@ -31,3 +31,11 @@ class downloader:
             del yt # Allow garbage collection
 
         return titles
+    
+    @staticmethod
+    def ReturnLinkTitle(link):
+        yt = YouTube(link)
+        title = yt.title
+        del yt # Allow garbage collection
+
+        return title

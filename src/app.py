@@ -6,6 +6,7 @@ import time
 import threading
 import queue
 import copy
+import re
 
 class App():
     def __init__(self, token, intents, botName) -> None:
@@ -26,7 +27,8 @@ class App():
                                 "CheckStatus": self.getStatus
                                 })
         # Holds all method per download type
-        self.downloadDictionary = {"YoutubeLink": self.DownloadAndRespond}
+        self.downloadDictionary = {"YoutubeLink": self.DownloadAndRespond,
+                                   "MultipleLinks": self.MultipleLinkDownload}
     
     # Protocol methods
     """
@@ -64,8 +66,8 @@ class App():
         if not self.queue.empty():
             messageQueued = self.queue.get()  # [Protocol, UserId, Message, ServerId]
             
-            # If protocol is "YoutubeLink" then pass it to the downloadQueue for download thread to handle
-            if messageQueued[0] == "YoutubeLink":
+            # If protocol is "YoutubeLink" or "MultipleLinks" then pass it to the downloadQueue for download thread to handle
+            if messageQueued[0] in self.downloadDictionary:
                 self.downloadQueue.put(messageQueued)
                 return
 
@@ -92,7 +94,7 @@ class App():
             if not self.downloadQueue.empty():
                 downloadMessageToProcess = self.downloadQueue.get()
                 # Uses hashmap for determine the type of download
-                self.downloadDictionary[downloadMessageToProcess[0]](downloadMessageToProcess)
+                self.downloadDictionary[downloadMessageToProcess[0]](downloadMessageToProcess=downloadMessageToProcess, additional="")
             time.sleep(0.5)
 
     # Handler helper methods
@@ -106,23 +108,41 @@ class App():
     """
     Downloads the link and respond to the user
     """
-    def DownloadAndRespond(self, downloadMessageToProcess):
-        # Downloads the music and return the path
-        music_path = downloader.ReturnMusic(downloadMessageToProcess[2].split(' ', 1)[1])
+    def DownloadAndRespond(self, downloadMessageToProcess, *args, **kwargs):
+        link = downloadMessageToProcess[2].split('!download', 1)[1]
         # Message that tells user that download is being processed
         self.respond.sendRespond("RespondBeforeDownload",
                                 downloadMessageToProcess[1],
                                 downloadMessageToProcess[3],
                                 self.token,
-                                f" {music_path.split('/', 1)[1]}",
+                                downloader.ReturnLinkTitle(link), # TODO FIND A WAY TO GET THE NAME FIRST MAKE A SINGLE RETURN TITLE
                                 None)
+        
+        # Downloads the music and return the path
+        music_path = downloader.ReturnMusic(link)
+        
         # Message that sends the downloaded music
         self.respond.sendRespond(downloadMessageToProcess[0],
                                 downloadMessageToProcess[1],
                                 downloadMessageToProcess[3],
                                 self.token,
-                                "",
+                                kwargs.get("additional", ""), 
                                 music_path)
+
+    """
+    Handles "MultipleLink" protocol buy taking the links and downloading it one by one
+    """
+    def MultipleLinkDownload(self, downloadMessageToProcess, **kwargs):
+        # Split the message to get URLs after the command
+        message = downloadMessageToProcess[2].split("!downloadMany", 1)[1]
+        
+        # Extract and clean the URLs
+        urls = [url.strip() for url in message.split(",")]
+
+        for i in range(len(urls)):
+            if re.match(r'^(https?://)?(www\.)?(youtube\.com/watch\?v=|youtu\.be/)([a-zA-Z0-9_-]{11})$', urls[i]):
+                self.DownloadAndRespond([downloadMessageToProcess[0], downloadMessageToProcess[1], f"!download {urls[i]}", downloadMessageToProcess[3]])
+                    
 
 
     def StartProgram(self):

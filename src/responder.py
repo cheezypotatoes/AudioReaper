@@ -16,15 +16,17 @@ class respond:
             "CheckDownloadQueue": "\n Current download queue: \n",
             "YoutubeLink": "Processing link please wait",
             "RespondAfterDownload": "Here is your requested MP3 file!",
-            "RespondBeforeDownload": "Processing your mp3 title:",
+            "RespondBeforeDownload": "Processing your mp3 title: ",
             "ClearDownloadQueue": "Download queue cleared",
-            "DownloadMany": "DownloadManyOutput:"
-        }       
+            "MultipleLinks": "Link Number:"
+        }
+
+        self.downloadProtocol = {"YoutubeLink", "MultipleLinks"}      
     
     def sendRespond(self, protocol, sender_id, server_id, token, additional, music_path): # Normal Respond
         header = {'authorization': token}
 
-        if protocol == "YoutubeLink":
+        if protocol in self.downloadProtocol:
             with open(music_path, 'rb') as f:
                 music = f.read()  # Read the MP3 file in binary mode
 
