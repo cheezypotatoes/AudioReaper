@@ -22,15 +22,22 @@ class App():
         self.protocolAdditionalFunctions = defaultdict(lambda: self.defaultDoesNothing, {
                                 "CheckDownloadQueue": self.returnDownloadQueue,
                                 })
-        
-    def returnDownloadQueue(self, *args, **kwargs):
-        copiedQueue = list(copy.copy(self.downloadQueue.queue))
-        print(copiedQueue)
-        return None
     
+    # Protocol methods
+    """
+    Copies the queue and get all titles for it then returned a formatted version
+    """
+    def returnDownloadQueue(self, *args, **kwargs):
+        copiedQueue = [item[2].split(" ", 1)[1] for item in copy.copy(self.downloadQueue.queue)]
+        titles = downloader.ReturnLinkTitles(copiedQueue)
+        cleaned_titles = [' '.join(title.strip().replace('\n', ' ').replace('\r', '').split()).title() for title in titles]
+        formatted_list = "\n".join(f"• {title}" for title in cleaned_titles)
+        return formatted_list
+    """
+    Basically if protocol doesn't use any method return nothing
+    """
     def defaultDoesNothing(self, *args, **kwargs):
         return None
-
     """
     Grabs message to process from the listener queue to handle
     """
@@ -39,6 +46,7 @@ class App():
         if result:  # This checks if result is not None and not empty
             self.queue.put(result)
 
+    # HANDLERS
     def handleMessageToProcess(self):
         if not self.queue.empty():
             messageQueued = self.queue.get()  # [Protocol, UserId, Message, ServerId]
@@ -51,7 +59,6 @@ class App():
             additionalRespond = self.protocolAdditionalFunctions[messageQueued[0]](sender_text=messageQueued[2])
 
             self.respond.sendRespond(messageQueued[0], messageQueued[1], messageQueued[3], self.token, additionalRespond if additionalRespond is not None else "",None)
-
 
     """
     Method that handles with the respond by checking if there's message to processes and handles it
@@ -90,7 +97,7 @@ class App():
     def StartProgram(self):
         self.listenerThread.start()  # Listener
         self.respondThread.start()  # Respond
-        self.downloadThread.start()  # Download
+        #self.downloadThread.start()  # Download
         
         while True: # Keeps everything from running if main thread is done everything is done
             time.sleep(1)
