@@ -11,14 +11,27 @@ class respond:
                 "3. `!status`\n     > Check the current status of the bot.\n"
                 "4. `!downloadQueue`\n     > Shows the download queue.\n"
                 "5. `!clear`\n     > Clears the current queue.\n"
-                "6. `!downloadMany <url>,<url>..`\n     > Convert multiple links. (download)\n"),
+                "6. `!downloadMany <url>,<url>..`\n     > Convert multiple links. (download)\n"
+                "7. `!credits`\n     > The Man Behind The Bot"),
             "CheckStatus": "STATUS:",
             "CheckDownloadQueue": "\n Current download queue: \n",
             "YoutubeLink": "Processing link please wait",
             "RespondAfterDownload": "Here is your requested MP3 file!",
             "RespondBeforeDownload": "Processing your mp3 title: ",
             "ClearDownloadQueue": "Download queue cleared",
-            "MultipleLinks": "Link Number:"
+            "MultipleLinks": "Link Number:",
+            "ShowCredits": (
+                "\n=========================================\n"
+                "                        CREDITS\n"
+                "=========================================\n"
+                " Created by:   cheezypotatoes (Jorge)\n\n"
+                " Github:       https://github.com/cheezypotatoes\n"
+                "=========================================\n"
+                "    Good morning! If I don't see you,\n"
+                "    good afternoon, good evening, and\n"
+                "    good night!\n"
+                "=========================================\n"
+            )
         }
 
         self.downloadProtocol = {"YoutubeLink", "MultipleLinks"}      

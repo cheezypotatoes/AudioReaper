@@ -22,7 +22,8 @@ class listenerClass:
             "!downloadQueue": "CheckDownloadQueue",
             "!status": "CheckStatus",
             "!clear": "ClearDownloadQueue",
-            "!downloadMany": "MultipleLinks"
+            "!downloadMany": "MultipleLinks",
+            "!credits": "ShowCredits"
         })
 
     async def onReady(self, *args, **kwargs):

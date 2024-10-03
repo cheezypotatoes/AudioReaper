@@ -24,7 +24,7 @@ class App():
         self.protocolAdditionalFunctions = defaultdict(lambda: self.defaultDoesNothing, {
                                 "CheckDownloadQueue": self.returnDownloadQueue,
                                 "ClearDownloadQueue": self.clearDownloadQueue,
-                                "CheckStatus": self.getStatus
+                                "CheckStatus": self.getStatus                
                                 })
         # Holds all method per download type
         self.downloadDictionary = {"YoutubeLink": self.DownloadAndRespond,
