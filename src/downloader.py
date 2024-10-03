@@ -1,4 +1,5 @@
 from pytube import YouTube
+from pytube.exceptions import PytubeError
 import re
 
 class downloader:
@@ -34,8 +35,9 @@ class downloader:
     
     @staticmethod
     def ReturnLinkTitle(link):
-        yt = YouTube(link)
-        title = yt.title
-        del yt # Allow garbage collection
-
-        return title
+        try:
+            yt = YouTube(link)
+            title = yt.title
+            return title
+        except PytubeError as e:
+            return "TITLE NOT FOUND"  # or handle the error as needed

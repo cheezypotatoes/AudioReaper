@@ -9,10 +9,10 @@ import copy
 import re
 
 class App():
-    def __init__(self, token, intents, botName) -> None:
+    def __init__(self, token, username, intent) -> None:
         self.token = token
-        self.intents = intents
-        self.botName = botName # Can't find the api for getting it automatically
+        self.intents = intent
+        self.botName = username # Can't find the api for getting it automatically
         self.listener = listenerClass(self.token, self.intents, self.botName)  # listener
         self.respond = respond()  # Responder
         self.listenerThread = threading.Thread(target=self.listener.startWebsocket, daemon=True)  # Handles Listener
@@ -109,25 +109,29 @@ class App():
     Downloads the link and respond to the user
     """
     def DownloadAndRespond(self, downloadMessageToProcess, *args, **kwargs):
-        link = downloadMessageToProcess[2].split('!download', 1)[1]
-        # Message that tells user that download is being processed
-        self.respond.sendRespond("RespondBeforeDownload",
-                                downloadMessageToProcess[1],
-                                downloadMessageToProcess[3],
-                                self.token,
-                                downloader.ReturnLinkTitle(link), # TODO FIND A WAY TO GET THE NAME FIRST MAKE A SINGLE RETURN TITLE
-                                None)
-        
-        # Downloads the music and return the path
-        music_path = downloader.ReturnMusic(link)
-        
-        # Message that sends the downloaded music
-        self.respond.sendRespond(downloadMessageToProcess[0],
-                                downloadMessageToProcess[1],
-                                downloadMessageToProcess[3],
-                                self.token,
-                                kwargs.get("additional", ""), 
-                                music_path)
+        try:
+            link = downloadMessageToProcess[2].split('!download', 1)[1]
+            # Message that tells user that download is being processed
+            self.respond.sendRespond("RespondBeforeDownload",
+                                    downloadMessageToProcess[1],
+                                    downloadMessageToProcess[3],
+                                    self.token,
+                                    downloader.ReturnLinkTitle(link),  # Return single title for link
+                                    None)
+            
+            # Downloads the music and return the path
+            music_path = downloader.ReturnMusic(link)
+            
+            # Message that sends the downloaded music
+            self.respond.sendRespond(downloadMessageToProcess[0],
+                                    downloadMessageToProcess[1],
+                                    downloadMessageToProcess[3],
+                                    self.token,
+                                    kwargs.get("additional", ""), 
+                                    music_path)
+        except Exception as errorMessage:
+            print(f"ERROR: {errorMessage}. Re-adding process to the downloader")  # Need more observation due to unable to replicate error
+            self.downloadDictionary[downloadMessageToProcess[0]](downloadMessageToProcess=downloadMessageToProcess, additional="")
 
     """
     Handles "MultipleLink" protocol buy taking the links and downloading it one by one
@@ -153,16 +157,27 @@ class App():
         while True: # Keeps everything from running if main thread is done everything is done
             time.sleep(1)
 
-    
+    """
+    Startup
+    """
+    @staticmethod
+    def StartupMenu():
+        print(""""
+         █████  ██    ██ ██████  ██  ██████  ██████  ███████  █████  ██████  ███████ ██████  
+        ██   ██ ██    ██ ██   ██ ██ ██    ██ ██   ██ ██      ██   ██ ██   ██ ██      ██   ██ 
+        ███████ ██    ██ ██   ██ ██ ██    ██ ██████  █████   ███████ ██████  █████   ██████  
+        ██   ██ ██    ██ ██   ██ ██ ██    ██ ██   ██ ██      ██   ██ ██      ██      ██   ██ 
+        ██   ██  ██████  ██████  ██  ██████  ██   ██ ███████ ██   ██ ██      ███████ ██   ██                                                                                                                                                                   
+        """"")
 
+        token = input("Please enter your token: ")
+        username = input("Please enter your username: ")
+        intent = input("Intent: ")
+        return [token, username, intent]
+
+    
 
 if __name__ == "__main__":
-    token = ""
-    application = App(token, "32767", "existentialwonders")  # TOKEN, TYPE OF LISTENER, NAME
+    data = App.StartupMenu()
+    application = App(data[0], data[1], data[2])
     application.StartProgram()
-
-
-
-
-
-    
