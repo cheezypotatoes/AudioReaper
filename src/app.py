@@ -1,4 +1,5 @@
 from collections import defaultdict
+from typing import List
 from listener import listenerClass
 from responder import respond
 from downloader import downloader  # Static
@@ -32,16 +33,16 @@ class App():
     
     # Protocol methods
     """
-    Copies the queue and get all titles for it then returned a formatted version
+    Copies the queue and gets all titles for it, then returns a formatted version.
     """
-    def returnDownloadQueue(self, *args, **kwargs):
+    def returnDownloadQueue(self, *args, **kwargs) -> List[str]:
         copiedQueue = [item[2].split(" ", 1)[1] for item in copy.copy(self.downloadQueue.queue)]
         titles = downloader.ReturnLinkTitles(copiedQueue)
         cleaned_titles = [' '.join(title.strip().replace('\n', ' ').replace('\r', '').split()).title() for title in titles]
         formatted_list = "\n".join(f"• {title}" for title in cleaned_titles)
         return formatted_list
     """
-    Basically if protocol doesn't use any method return nothing
+    Basically, if the protocol doesn't use any method, return nothing.
     """
     def defaultDoesNothing(self, *args, **kwargs):
         return None
@@ -60,7 +61,7 @@ class App():
 
     # HANDLERS
     """
-    Handles the messages, if protocol require downloads such as "YoutubeLink" It is transferred to downloadQueue for download thread to handle
+    Handles the messages; if protocols require downloads, such as "YoutubeLink," it is transferred to the queue for the download thread to handle.
     """
     def handleMessageToProcess(self):
         if not self.queue.empty():
@@ -78,7 +79,7 @@ class App():
             self.respond.sendRespond(messageQueued[0], messageQueued[1], messageQueued[3], self.token, additionalRespond if additionalRespond is not None else "",None)
 
     """
-    Method that handles with the respond by checking if there's message to processes and handles it
+    Method that handles the response by checking if there's a message to process and handles it
     """
     def respondHandler(self):
         while True:
@@ -87,7 +88,7 @@ class App():
             time.sleep(0.3)  # Adjust?
     
     """
-    Method that handles with messages that uses 'YoutubeLink' or "MultipleLink" protocol
+    Method that handles messages that use 'YoutubeLink' or "MultipleLink" protocol
     """
     def downloadHandler(self):
         while True:
@@ -134,7 +135,7 @@ class App():
             self.downloadDictionary[downloadMessageToProcess[0]](downloadMessageToProcess=downloadMessageToProcess, additional="")
 
     """
-    Handles "MultipleLink" protocol buy taking the links and downloading it one by one
+    Handles the "MultipleLink" protocol by taking the links and downloading them one by one.
     """
     def MultipleLinkDownload(self, downloadMessageToProcess, **kwargs):
         # Split the message to get URLs after the command

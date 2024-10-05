@@ -3,6 +3,7 @@ import requests
 
 class respond:
     def __init__(self) -> None:
+        # Responds for each protocol
         self.respond = {
             "Greet": "Hello There, This is an automatic reply",
             "Instruction": (

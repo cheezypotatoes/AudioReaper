@@ -1,11 +1,15 @@
 from pytube import YouTube
 from pytube.exceptions import PytubeError
+from typing import List
 import re
 
 class downloader:
 
+    """
+    Downloads the mp3
+    """
     @staticmethod
-    def ReturnMusic(link):
+    def ReturnMusic(link: str) -> str:
         try:
             yt = YouTube(link)
             audio_stream = yt.streams.filter(only_audio=True).first()
@@ -23,8 +27,11 @@ class downloader:
         except Exception as e:
             print(f"An error occurred: {e}")
 
+    """
+    For multiple link.
+    """
     @staticmethod
-    def ReturnLinkTitles(list):
+    def ReturnLinkTitles(list: str) -> List[str]:
         titles = []
         for link in list:
             yt = YouTube(link)
@@ -33,8 +40,11 @@ class downloader:
 
         return titles
     
+    """
+    For single link.
+    """
     @staticmethod
-    def ReturnLinkTitle(link):
+    def ReturnLinkTitle(link: str) -> str:
         try:
             yt = YouTube(link)
             title = yt.title

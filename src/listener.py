@@ -26,10 +26,10 @@ class listenerClass:
             "!credits": "ShowCredits"
         })
 
-    async def onReady(self, *args, **kwargs):
+    async def onReady(self, *args, **kwargs) -> None:
         print("BOT IS READY")
 
-    async def heartbeat(self, ws, interval):
+    async def heartbeat(self, ws, interval) -> None:
         while True:
             await asyncio.sleep(interval / 1000)  # Convert milliseconds to seconds
             heartbeat_payload = {
@@ -39,7 +39,7 @@ class listenerClass:
             await ws.send(json.dumps(heartbeat_payload))
             print('Sent Heartbeat')
 
-    async def identify(self, ws):
+    async def identify(self, ws) -> None:
         identify_payload = {
             "op": 2,  # Opcode for Identify
             "d": {
@@ -55,7 +55,7 @@ class listenerClass:
         await ws.send(json.dumps(identify_payload))
         print('Sent Identify Payload')
 
-    async def sendHelloEvent(self, ws):  # Only called once
+    async def sendHelloEvent(self, ws) -> None:  # Only called once
         message = await ws.recv()
         payload = json.loads(message)
         op = payload.get("op") # Might be useful hello event is op = 10
@@ -68,7 +68,7 @@ class listenerClass:
         await self.identify(ws)
         print("Connected to Discord Gateway")
 
-    async def listen(self):
+    async def listen(self) -> None:
         """Main function to handle the WebSocket connection."""
         async with websockets.connect(self.gateway_url, max_size=None) as ws: # Fix file size error
             await self.sendHelloEvent(ws)
